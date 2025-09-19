@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 
 	"github.com/charmbracelet/log"
@@ -27,7 +28,9 @@ func execute(wrapInBash bool, stdin *bytes.Buffer, command string, args ...strin
 	} else {
 		cmd = exec.Command(command, args...)
 	}
-	logger.Debugf("Command to execute `%s`", cmd.String())
+	logger.Debug("Command", "cmd", cmd.String())
+
+	cmd.Env = os.Environ()
 
 	var errorBuffer bytes.Buffer
 	var outputBuffer bytes.Buffer
