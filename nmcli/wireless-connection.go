@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/zarinit-routers/cli"
 )
 
@@ -28,6 +27,12 @@ const (
 	OptionKeyWirelessSeenBSSIDs            = "802-11-wireless.seen-bssids"
 )
 
+func (c *Connection) AsWireless() (*WirelessConnection, error) {
+	if c.Type != ConnectionTypeWireless {
+		return nil, fmt.Errorf("connection %q is not a wireless connection but a %s connection", c.Name, c.Type)
+	}
+	return &WirelessConnection{c}, nil
+}
 func CreateWirelessConnection(
 	deviceName string,
 	connectionName string) (*WirelessConnection, error) {

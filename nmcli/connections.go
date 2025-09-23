@@ -5,7 +5,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/zarinit-routers/cli"
 )
 
@@ -91,6 +90,7 @@ func createConnection(
 }
 
 const (
+	OptionKeyAutoconnect   = "connection.autoconnect"
 	OptionKeyIP4Method     = "ipv4.method"
 	OptionKeyIP4Addresses  = "ipv4.addresses"
 	OptionKeyGeneralState  = "GENERAL.STATE"
@@ -132,8 +132,16 @@ func (c *Connection) SetDHCPLeaseTime(secs int) error {
 	return c.setOption(OptionKeyDHCPLeaseTime, fmt.Sprintf("%d", secs))
 }
 
+func (c *Connection) GetGateway() net.IP {
+	gateway := c.getOption(OptionKeyIP4Gateway)
+	return net.ParseIP(gateway)
+}
 func (c *Connection) SetGateway(gateway net.IP) error {
 	return c.setOption(OptionKeyIP4Gateway, gateway.String())
+}
+func (c *Connection) GetAutoconnect() bool {
+	opt := c.getOption(OptionKeyAutoconnect)
+	return opt == "yes"
 }
 
 type ConnectionState = string
@@ -159,7 +167,7 @@ func (c *Connection) setOption(optionName, optionValue string) error {
 }
 
 func GetConnection(name string) (*Connection, error) {
-	output, err := cli.Execute("nmcli", allFieldsFlag, terseFlag, showSecretsFlag, "connection", "show", name)
+	output, err := cli.Execute("nmcli", allFieldsFlag, terseFlag, showSecretsFlag, "connection", "show", fmt.Sprintf("%q", name))
 	if err != nil {
 		return nil, err
 	}

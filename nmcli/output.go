@@ -3,8 +3,6 @@ package nmcli
 import (
 	"fmt"
 	"strings"
-
-	"github.com/charmbracelet/log"
 )
 
 type keyValOutput struct {
@@ -51,5 +49,6 @@ func (c *keyValOutput) getOption(optionName string) string {
 		log.Error("Failed to parse options", "error", err)
 		return ""
 	}
+	log.Debug("Getting option", "option", optionName, "value", c.options[optionName])
 	return c.options[optionName]
 }
