@@ -20,12 +20,8 @@ func init() {
 	viper.SetDefault("cli.iw.default-interface", "wlan0")
 }
 
-func GetConnectedDevices() ([]ConnectedDevice, error) {
-	return getConnectedDevices()
-}
-
-func getConnectedDevices() ([]ConnectedDevice, error) {
-	output, err := cli.Execute("iw", "dev", viper.GetString("cli.iw.default-interface"), "station", "dump")
+func GetConnectedDevices(device string) ([]ConnectedDevice, error) {
+	output, err := cli.Execute("iw", "dev", device, "station", "dump")
 	if err != nil {
 		return nil, err
 	}
