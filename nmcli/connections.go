@@ -9,11 +9,12 @@ import (
 )
 
 type Connection struct {
-	Name    string
-	UUID    string
-	Type    ConnectionType
-	Device  string
-	options map[string]string
+	*keyValOutput
+
+	Name   string
+	UUID   string
+	Type   ConnectionType
+	Device string
 }
 type WirelessConnection struct {
 	*Connection
@@ -125,31 +126,13 @@ func (c *Connection) IsActive() bool {
 	return ConnectionState(state) == ConnectionStateActivated
 }
 
-func (c *Connection) getOption(optionName string) string {
-	c.ensureOptionsParsed()
-	return c.options[optionName]
-}
-
-func (c *Connection) ensureOptionsParsed() error {
-	if c.options != nil {
-		return nil
-	}
-
-	output, err := cli.ExecuteWrap("nmcli", terseFlag, showSecretsFlag, "connection", "show", c.Name)
-	if err != nil {
-		return err
-	}
-	c.options = parseKeyValOutput(output)
-	return nil
-}
-
 func (c *Connection) setOption(optionName, optionValue string) error {
 	log.Debugf("Setting option %s to '%s', current value is '%s'", optionName, optionValue, c.options[optionName])
 	return cli.ExecuteErr("nmcli", "connection", "modify", c.Name, optionName, optionValue)
 }
 
 func GetConnection(name string) (*Connection, error) {
-	output, err := cli.ExecuteWrap("nmcli", terseFlag, showSecretsFlag, "connection", "show", name)
+	output, err := cli.Execute("nmcli", terseFlag, showSecretsFlag, "connection", "show", name)
 	if err != nil {
 		return nil, err
 	}
@@ -157,27 +140,17 @@ func GetConnection(name string) (*Connection, error) {
 }
 
 func parseShowConnectionOutput(output []byte) *Connection {
-	dict := parseKeyValOutput(output)
+	kv := newKeyValOutput(output)
+	if err := kv.ensureOptionsParsed(); err != nil {
+		log.Errorf("Failed to parse connection output: %s", err)
+	}
+
 	return &Connection{
-		Name:    dict["connection.id"],
-		UUID:    dict["connection.uuid"],
-		Type:    ConnectionType(dict["connection.type"]),
-		Device:  dict["connection.interface-name"],
-		options: dict,
-	}
-}
+		keyValOutput: kv,
 
-func parseKeyValOutput(output []byte) map[string]string {
-	dict := map[string]string{}
-	lines := strings.Split(string(output), "\n")
-	for _, l := range lines {
-		words := strings.Split(l, ":")
-		if len(words) < 2 {
-			dict[words[0]] = ""
-			continue
-		}
-
-		dict[words[0]] = words[1]
+		Name:   kv.getOption("connection.id"),
+		UUID:   kv.getOption("connection.uuid"),
+		Type:   ConnectionType(kv.getOption("connection.type")),
+		Device: kv.getOption("connection.interface-name"),
 	}
-	return dict
 }

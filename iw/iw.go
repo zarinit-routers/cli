@@ -25,7 +25,7 @@ func GetConnectedDevices() ([]ConnectedDevice, error) {
 }
 
 func getConnectedDevices() ([]ConnectedDevice, error) {
-	output, err := cli.ExecuteWrap("iw", "dev", viper.GetString("cli.iw.default-interface"), "station", "dump")
+	output, err := cli.Execute("iw", "dev", viper.GetString("cli.iw.default-interface"), "station", "dump")
 	if err != nil {
 		return nil, err
 	}

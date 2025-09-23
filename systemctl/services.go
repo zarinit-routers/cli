@@ -23,11 +23,11 @@ func init() {
 }
 
 func ServiceExists(name string) bool {
-	_, err := cli.ExecuteWrap(SystemctlExecutable, "list-unit-files", name)
+	_, err := cli.Execute(SystemctlExecutable, "list-unit-files", name)
 	return err == nil
 }
 func Enable(name string) error {
-	_, err := cli.ExecuteWrap(SystemctlExecutable, "enable", "--now", name)
+	_, err := cli.Execute(SystemctlExecutable, "enable", "--now", name)
 	if err != nil {
 		log.Errorf("Failed enable '%s' service: %s", name, err)
 		printErrorDebugInfo(name)
@@ -35,7 +35,7 @@ func Enable(name string) error {
 	return err
 }
 func Disable(name string) error {
-	_, err := cli.ExecuteWrap(SystemctlExecutable, "disable", "--now", name)
+	_, err := cli.Execute(SystemctlExecutable, "disable", "--now", name)
 	if err != nil {
 		log.Errorf("Failed disable '%s' service: %s", name, err)
 		printErrorDebugInfo(name)
@@ -44,7 +44,7 @@ func Disable(name string) error {
 }
 
 func IsActive(name string) bool {
-	output, err := cli.ExecuteWrap(SystemctlExecutable, "is-active", name)
+	output, err := cli.Execute(SystemctlExecutable, "is-active", name)
 
 	// Pass if error is 'exit code 3'
 	// Exit code 3 is for inactive state of service
@@ -64,7 +64,7 @@ func IsActive(name string) bool {
 	return strOutput == StatusActive
 }
 func Restart(name string) error {
-	_, err := cli.ExecuteWrap(SystemctlExecutable, "restart", name)
+	_, err := cli.Execute(SystemctlExecutable, "restart", name)
 	if err != nil {
 		log.Errorf("Failed restart '%s' service: %s", name, err)
 		printErrorDebugInfo(name)

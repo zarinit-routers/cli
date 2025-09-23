@@ -11,7 +11,7 @@ const (
 )
 
 func GetHardwareAddress(deviceName string) (address string, err error) {
-	output, err := cli.ExecuteWrap("nmcli", terseFlag, getFieldsFlag(OptionKeyHardwareAddress), "device", "show", deviceName)
+	output, err := cli.Execute("nmcli", terseFlag, getFieldsFlag(OptionKeyHardwareAddress), "device", "show", deviceName)
 	if err != nil {
 		return "", err
 	}

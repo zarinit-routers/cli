@@ -6,6 +6,7 @@
 package nmcli
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,14 @@ const (
 func CreateWirelessConnection(
 	deviceName string,
 	connectionName string) (*WirelessConnection, error) {
+
+	dev, err := GetDevice(deviceName)
+	if err != nil {
+		return nil, fmt.Errorf("can't get device %q: %s", deviceName, err)
+	}
+	if !dev.CanBeAccessPoint() {
+		return nil, fmt.Errorf("device %q can't be access point", deviceName)
+	}
 
 	conn, err := createConnection(
 		ConnectionTypeWIFI, deviceName, connectionName,
@@ -184,7 +193,7 @@ func (c *WirelessConnection) GetSignalStrength() uint {
 func (c *WirelessConnection) getDeviceData(key DeviceDataKey) (string, error) {
 	bssid := c.GetBSSID()
 
-	val, err := cli.ExecuteWrap(
+	val, err := cli.Execute(
 		"nmcli", terseFlag, getFieldsFlag(string(key)),
 		"device", "wifi", "list",
 		"bssid", bssid,
