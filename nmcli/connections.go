@@ -159,7 +159,7 @@ func (c *Connection) setOption(optionName, optionValue string) error {
 }
 
 func GetConnection(name string) (*Connection, error) {
-	output, err := cli.Execute("nmcli", terseFlag, showSecretsFlag, "connection", "show", name)
+	output, err := cli.Execute("nmcli", allFieldsFlag, terseFlag, showSecretsFlag, "connection", "show", name)
 	if err != nil {
 		return nil, err
 	}
