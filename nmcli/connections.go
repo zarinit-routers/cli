@@ -2,6 +2,7 @@ package nmcli
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -90,9 +91,13 @@ func createConnection(
 }
 
 const (
-	OptionKeyIP4Method    = "ipv4.method"
-	OptionKeyIP4Addresses = "ipv4.addresses"
-	OptionKeyGeneralState = "GENERAL.STATE"
+	OptionKeyIP4Method     = "ipv4.method"
+	OptionKeyIP4Addresses  = "ipv4.addresses"
+	OptionKeyGeneralState  = "GENERAL.STATE"
+	OptionKeyDNSAddresses  = "ipv4.dns"
+	OptionKeyDHCPRange     = "ipv4.dhcp-range"
+	OptionKeyDHCPLeaseTime = "ipv4.dhcp-lease-time"
+	OptionKeyIP4Gateway    = "ipv4.gateway"
 )
 
 type IP4Method = string
@@ -115,6 +120,22 @@ func (c *Connection) Down() error {
 	return cli.ExecuteErr("nmcli", "connection", "down", c.Name)
 }
 
+// TODO: move to net.IP
+func (c *Connection) SetDNSAddresses(addresses []string) error {
+	return c.setOption(OptionKeyDNSAddresses, strings.Join(addresses, ","))
+}
+func (c *Connection) SetDHCPRange(from, to net.IP) error {
+	return c.setOption(OptionKeyDHCPRange, strings.Join(
+		[]string{from.String(), to.String()}, ","))
+}
+func (c *Connection) SetDHCPLeaseTime(secs int) error {
+	return c.setOption(OptionKeyDHCPLeaseTime, fmt.Sprintf("%d", secs))
+}
+
+func (c *Connection) SetGateway(gateway net.IP) error {
+	return c.setOption(OptionKeyIP4Gateway, gateway.String())
+}
+
 type ConnectionState = string
 
 const (
@@ -127,8 +148,14 @@ func (c *Connection) IsActive() bool {
 }
 
 func (c *Connection) setOption(optionName, optionValue string) error {
-	log.Debugf("Setting option %s to '%s', current value is '%s'", optionName, optionValue, c.options[optionName])
-	return cli.ExecuteErr("nmcli", "connection", "modify", c.Name, optionName, optionValue)
+	log.Debug("Setting option", "option", optionName, "newValue", optionValue, "currentValue", c.options[optionName])
+	err := cli.ExecuteErr("nmcli", "connection", "modify", c.Name, optionName, optionValue)
+	if err != nil {
+		return err
+	}
+
+	c.options[optionName] = optionValue
+	return nil
 }
 
 func GetConnection(name string) (*Connection, error) {
