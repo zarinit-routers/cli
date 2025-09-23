@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/spf13/viper"
 	"github.com/zarinit-routers/cli"
 )
 
@@ -14,10 +13,6 @@ type ConnectedDevice struct {
 	Interface string `json:"interface"`
 	TxBitrate string `json:"txBitrate"`
 	RxBitrate string `json:"rxBitrate"`
-}
-
-func init() {
-	viper.SetDefault("cli.iw.default-interface", "wlan0")
 }
 
 func GetConnectedDevices(device string) ([]ConnectedDevice, error) {
