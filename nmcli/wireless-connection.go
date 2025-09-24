@@ -48,7 +48,11 @@ func CreateWirelessConnection(deviceName string, connectionName string, password
 
 	conn, err := createConnection(
 		ConnectionTypeWIFI, deviceName, connectionName,
-		[]string{"autoconnect", TrueValue, "ssid", connectionName, "password", password},
+		[]string{
+			"autoconnect", TrueValue,
+			"ssid", connectionName,
+			OptionKeyWirelessSecurityPassword, password,
+		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed create base connection: %s", err)
