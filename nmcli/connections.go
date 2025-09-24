@@ -120,10 +120,14 @@ func (c *Connection) Down() error {
 func (c *Connection) SetDNSAddresses(addresses []string) error {
 	return c.setOption(OptionKeyDNSAddresses, strings.Join(addresses, ","))
 }
+
+// Deprecated: THis method must not be used
 func (c *Connection) SetDHCPRange(from, to net.IP) error {
 	return c.setOption(OptionKeyDHCPRange, strings.Join(
 		[]string{from.String(), to.String()}, ","))
 }
+
+// Deprecated: THis method must not be used
 func (c *Connection) SetDHCPLeaseTime(secs int) error {
 	return c.setOption(OptionKeyDHCPLeaseTime, fmt.Sprintf("%d", secs))
 }
