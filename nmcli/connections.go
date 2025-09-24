@@ -82,11 +82,7 @@ func createConnection(
 	if err != nil {
 		return nil, err
 	}
-	return &Connection{
-		Name:   connectionName,
-		Type:   t,
-		Device: deviceName,
-	}, nil
+	return GetConnection(connectionName)
 }
 
 const (
