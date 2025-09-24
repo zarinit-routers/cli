@@ -159,7 +159,7 @@ func (c *Connection) setOption(optionName, optionValue string) error {
 	log.Debug("Setting option", "option", optionName, "newValue", optionValue, "currentValue", c.options[optionName])
 	err := cli.ExecuteErr("nmcli", "connection", "modify", c.Name, optionName, optionValue)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed set option %q to %q: %s", optionName, optionValue, err)
 	}
 
 	c.options[optionName] = optionValue
@@ -169,7 +169,7 @@ func (c *Connection) setOption(optionName, optionValue string) error {
 func GetConnection(name string) (*Connection, error) {
 	output, err := cli.Execute("nmcli", allFieldsFlag, terseFlag, showSecretsFlag, "connection", "show", fmt.Sprintf("%q", name))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed execute NetworkManger: %s", err)
 	}
 	return parseShowConnectionOutput(output), nil
 }
