@@ -6,7 +6,6 @@
 package nmcli
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -52,23 +51,16 @@ func CreateWirelessConnection(deviceName string, connectionName string, password
 			"autoconnect", TrueValue,
 			"ssid", connectionName,
 			OptionKeyWirelessSecurityPassword, password,
+			OptionKeyWirelessSecurityKeyManagement, KeyManagementWPA2_3Personal,
+			OptionKeyWirelessSecurityProto, ProtoAllowWPA2RSN,
+			OptionKeyWirelessSecurityGroup, EncryptionAlgCcmp,
+			OptionKeyWirelessSecurityPairwise, EncryptionAlgCcmp,
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed create base connection: %s", err)
 	}
 	wireless := WirelessConnection{conn}
-
-	// TODO: This options should be moved to own functions
-	err = errors.Join(
-		wireless.setOption(OptionKeyWirelessSecurityKeyManagement, KeyManagementWPA2_3Personal),
-		wireless.setOption(OptionKeyWirelessSecurityProto, ProtoAllowWPA2RSN),
-		wireless.setOption(OptionKeyWirelessSecurityGroup, EncryptionAlgCcmp),
-		wireless.setOption(OptionKeyWirelessSecurityPairwise, EncryptionAlgCcmp),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed set necessary options: %s", err)
-	}
 
 	return &wireless, nil
 }
