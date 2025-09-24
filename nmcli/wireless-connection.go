@@ -37,6 +37,7 @@ func CreateWirelessConnection(deviceName string, connectionName string, password
 	if len(password) < 8 {
 		return nil, fmt.Errorf("invalid password: must be at least 8 characters long")
 	}
+
 	dev, err := GetDevice(deviceName)
 	if err != nil {
 		return nil, fmt.Errorf("can't get device %q: %s", deviceName, err)
@@ -61,6 +62,14 @@ func CreateWirelessConnection(deviceName string, connectionName string, password
 		return nil, fmt.Errorf("failed create base connection: %s", err)
 	}
 	wireless := WirelessConnection{conn}
+	if _, err := cli.Execute("nmcli", "device", "wifi", "hotspot",
+		"ifname", deviceName,
+		"conn-name", conn.Name,
+		"ssid", wireless.GetSSID(),
+		"password", wireless.GetPassword(),
+	); err != nil {
+		return nil, fmt.Errorf("can't create hotspot: %s", err)
+	}
 
 	return &wireless, nil
 }
