@@ -6,6 +6,7 @@
 package nmcli
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -33,10 +34,10 @@ func (c *Connection) AsWireless() (*WirelessConnection, error) {
 	}
 	return &WirelessConnection{c}, nil
 }
-func CreateWirelessConnection(
-	deviceName string,
-	connectionName string) (*WirelessConnection, error) {
-
+func CreateWirelessConnection(deviceName string, connectionName string, password string) (*WirelessConnection, error) {
+	if len(password) < 8 {
+		return nil, fmt.Errorf("invalid password: must be at least 8 characters long")
+	}
 	dev, err := GetDevice(deviceName)
 	if err != nil {
 		return nil, fmt.Errorf("can't get device %q: %s", deviceName, err)
@@ -47,17 +48,23 @@ func CreateWirelessConnection(
 
 	conn, err := createConnection(
 		ConnectionTypeWIFI, deviceName, connectionName,
-		[]string{"autoconnect", "yes", "ssid", connectionName},
+		[]string{"autoconnect", TrueValue, "ssid", connectionName, "password", password},
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed create base connection: %s", err)
 	}
 	wireless := WirelessConnection{conn}
+
 	// TODO: This options should be moved to own functions
-	wireless.setOption(OptionKeyWirelessSecurityKeyManagement, KeyManagementWPA2_3Personal)
-	wireless.setOption(OptionKeyWirelessSecurityProto, ProtoAllowWPA2RSN)
-	wireless.setOption(OptionKeyWirelessSecurityGroup, EncryptionAlgCcmp)
-	wireless.setOption(OptionKeyWirelessSecurityPairwise, EncryptionAlgCcmp)
+	err = errors.Join(
+		wireless.setOption(OptionKeyWirelessSecurityKeyManagement, KeyManagementWPA2_3Personal),
+		wireless.setOption(OptionKeyWirelessSecurityProto, ProtoAllowWPA2RSN),
+		wireless.setOption(OptionKeyWirelessSecurityGroup, EncryptionAlgCcmp),
+		wireless.setOption(OptionKeyWirelessSecurityPairwise, EncryptionAlgCcmp),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed set necessary options: %s", err)
+	}
 
 	return &wireless, nil
 }
@@ -142,7 +149,7 @@ func (c *WirelessConnection) SetPassword(password string) error {
 }
 
 const (
-	WirelessHiddenValue    = "yes"
+	WirelessHiddenValue    = TrueValue
 	WirelessNotHiddenValue = "no"
 )
 

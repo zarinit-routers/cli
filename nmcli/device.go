@@ -23,5 +23,5 @@ const (
 )
 
 func (d *Device) CanBeAccessPoint() bool {
-	return d.getOption(OptionKeyCanBeAccessPoint) == "yes"
+	return d.getOption(OptionKeyCanBeAccessPoint) == TrueValue
 }

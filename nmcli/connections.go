@@ -141,7 +141,7 @@ func (c *Connection) SetGateway(gateway net.IP) error {
 }
 func (c *Connection) GetAutoconnect() bool {
 	opt := c.getOption(OptionKeyAutoconnect)
-	return opt == "yes"
+	return opt == TrueValue
 }
 
 type ConnectionState = string
