@@ -23,11 +23,11 @@ func init() {
 }
 
 func ServiceExists(name string) bool {
-	_, err := cli.Execute(SystemctlExecutable, "list-unit-files", name)
+	err := cli.ExecuteErr(SystemctlExecutable, "list-unit-files", name)
 	return err == nil
 }
 func Enable(name string) error {
-	_, err := cli.Execute(SystemctlExecutable, "enable", "--now", name)
+	err := cli.ExecuteErr(SystemctlExecutable, "enable", "--now", name)
 	if err != nil {
 		log.Errorf("Failed enable '%s' service: %s", name, err)
 		printErrorDebugInfo(name)
@@ -35,7 +35,7 @@ func Enable(name string) error {
 	return err
 }
 func Disable(name string) error {
-	_, err := cli.Execute(SystemctlExecutable, "disable", "--now", name)
+	err := cli.ExecuteErr(SystemctlExecutable, "disable", "--now", name)
 	if err != nil {
 		log.Errorf("Failed disable '%s' service: %s", name, err)
 		printErrorDebugInfo(name)
@@ -44,19 +44,14 @@ func Disable(name string) error {
 }
 
 func IsActive(name string) bool {
-	output, err := cli.Execute(SystemctlExecutable, "is-active", name)
+	output, code, err := cli.ExecuteWithCode(SystemctlExecutable, "is-active", name)
 
-	// Pass if error is 'exit code 3'
-	// Exit code 3 is for inactive state of service
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			if exitErr.ExitCode() != ExitCodeInactive {
-				log.Errorf("Failed get status of '%s' service, exit code isn't valid: %s", name, err)
-			}
+		if _, ok := err.(*exec.ExitError); ok && code == ExitCodeInactive {
+			log.Errorf("Failed get status of '%s' service, exit code isn't valid: %s", name, err)
 		} else {
 			log.Errorf("Failed get status of '%s' service: %s", name, err)
 			return false
-
 		}
 		printErrorDebugInfo(name)
 	}
@@ -64,7 +59,7 @@ func IsActive(name string) bool {
 	return strOutput == StatusActive
 }
 func Restart(name string) error {
-	_, err := cli.Execute(SystemctlExecutable, "restart", name)
+	err := cli.ExecuteErr(SystemctlExecutable, "restart", name)
 	if err != nil {
 		log.Errorf("Failed restart '%s' service: %s", name, err)
 		printErrorDebugInfo(name)
