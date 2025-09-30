@@ -18,7 +18,7 @@ func wrapCommand(command string, args ...string) string {
 	return exec.Command(command, args...).String()
 }
 
-func execute(stdin *bytes.Buffer, command string, args ...string) ([]byte, error) {
+func execute(stdin *bytes.Buffer, command string, args ...string) ([]byte, int, error) {
 
 	var cmd *exec.Cmd
 	wrapped := wrapCommand(command, args...)
@@ -40,31 +40,27 @@ func execute(stdin *bytes.Buffer, command string, args ...string) ([]byte, error
 	err := cmd.Run()
 	if err != nil {
 		log.Warn("Error while executing command", "command", cmd.String(), "error", err, "stderr", errorBuffer.String())
-		return nil, err
+		return nil, cmd.ProcessState.ExitCode(), err
 	}
-	return outputBuffer.Bytes(), err
-
-}
-
-// Runs specified command in a bash shell
-//
-// Deprecated: Execute wrap should be removed later.
-// Use simple Execute function instead.
-// But firstly check if it works the same.
-func ExecuteWrap(command string, args ...string) ([]byte, error) {
-	return execute(nil, command, args...)
+	return outputBuffer.Bytes(), cmd.ProcessState.ExitCode(), err
 }
 
 // Run specified command
 func Execute(command string, args ...string) ([]byte, error) {
-	return execute(nil, command, args...)
+	output, _, err := execute(nil, command, args...)
+	return output, err
+}
+func ExecuteWithCode(command string, args ...string) ([]byte, int, error) {
+	output, code, err := execute(nil, command, args...)
+	return output, code, err
 }
 
 func WithStdin(stdin []byte, command string, args ...string) ([]byte, error) {
-	return execute(bytes.NewBuffer(stdin), command, args...)
+	output, _, err := execute(bytes.NewBuffer(stdin), command, args...)
+	return output, err
 }
 
 func ExecuteErr(command string, args ...string) error {
-	_, err := execute(nil, command, args...)
+	_, _, err := execute(nil, command, args...)
 	return err
 }
