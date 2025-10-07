@@ -34,8 +34,24 @@ func Enable(s Service) error {
 	}
 	return err
 }
+func EnableForUser(s Service) error {
+	err := cli.ExecuteErr(SystemctlExecutable, "enable", "--now", "--user", string(s))
+	if err != nil {
+		log.Error("Failed enable service", "service", string(s), "error", err)
+		printErrorDebugInfo(s)
+	}
+	return err
+}
 func Disable(s Service) error {
 	err := cli.ExecuteErr(SystemctlExecutable, "disable", "--now", string(s))
+	if err != nil {
+		log.Error("Failed disable service", "service", string(s), "error", err)
+		printErrorDebugInfo(s)
+	}
+	return err
+}
+func DisableForUser(s Service) error {
+	err := cli.ExecuteErr(SystemctlExecutable, "disable", "--now", "--user", string(s))
 	if err != nil {
 		log.Error("Failed disable service", "service", string(s), "error", err)
 		printErrorDebugInfo(s)
