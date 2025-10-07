@@ -40,7 +40,7 @@ func execute(stdin *bytes.Buffer, command string, args ...string) ([]byte, int, 
 	err := cmd.Run()
 	if err != nil {
 		log.Warn("Error while executing command", "command", cmd.String(), "error", err, "stderr", errorBuffer.String())
-		return nil, cmd.ProcessState.ExitCode(), err
+		return errorBuffer.Bytes(), cmd.ProcessState.ExitCode(), err
 	}
 	return outputBuffer.Bytes(), cmd.ProcessState.ExitCode(), err
 }
