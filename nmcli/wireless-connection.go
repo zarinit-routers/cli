@@ -131,7 +131,7 @@ func (c *WirelessConnection) GetSSID() string {
 func (c *WirelessConnection) SetSSID(ssid string) error {
 	err := c.setOption(OptionKeyWirelessSSID, ssid)
 	if err == nil {
-		c.ensureOptionsParsed()
+		return c.ensureOptionsParsed()
 	}
 	return err
 }
@@ -170,7 +170,7 @@ func (c *WirelessConnection) SetHidden(hide bool) error {
 	}
 	err := c.setOption(OptionKeyWirelessHidden, value)
 	if err == nil {
-		c.ensureOptionsParsed()
+		return c.ensureOptionsParsed()
 	}
 	return err
 }
