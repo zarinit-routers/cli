@@ -29,7 +29,7 @@ func ServiceExists(s Service) bool {
 func Enable(s Service) error {
 	err := cli.ExecuteErr(SystemctlExecutable, "enable", "--now", string(s))
 	if err != nil {
-		log.Errorf("Failed enable '%s' service: %s", string(s), err)
+		log.Error("Failed enable service", "service", string(s), "error", err)
 		printErrorDebugInfo(s)
 	}
 	return err
@@ -37,7 +37,7 @@ func Enable(s Service) error {
 func Disable(s Service) error {
 	err := cli.ExecuteErr(SystemctlExecutable, "disable", "--now", string(s))
 	if err != nil {
-		log.Errorf("Failed disable '%s' service: %s", string(s), err)
+		log.Error("Failed disable service", "service", string(s), "error", err)
 		printErrorDebugInfo(s)
 	}
 	return err
