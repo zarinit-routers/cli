@@ -16,12 +16,16 @@ func init() {
 	compiledRegex = reg
 }
 
-type Service string
+type Service struct {
+	name string
+}
 
 func NewService(name string) Service {
 	match := compiledRegex.MatchString(name)
 	if !match {
 		log.Fatal("Invalid service name", "name", name)
 	}
-	return Service(name)
+	return Service{
+		name: name,
+	}
 }
