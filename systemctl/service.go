@@ -6,13 +6,20 @@ import (
 
 const ServiceNameRegex = `^[a-zA-Z0-9-_\.:\\]+$`
 
+var compiledRegex *regexp.Regexp
+
+func init() {
+	reg, err := regexp.Compile(ServiceNameRegex)
+	if err != nil {
+		log.Fatal("Failed compile regular expression", "error", err, "expression", ServiceNameRegex)
+	}
+	compiledRegex = reg
+}
+
 type Service string
 
 func NewService(name string) Service {
-	match, err := regexp.MatchString(ServiceNameRegex, name)
-	if err != nil {
-		log.Fatal("Failed to match service name", "error", err, "name", name)
-	}
+	match := compiledRegex.MatchString(name)
 	if !match {
 		log.Fatal("Invalid service name", "name", name)
 	}
